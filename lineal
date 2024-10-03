@@ -1,0 +1,246 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+const int MAX = 100;  // Tamaño maximo de la cola
+
+// Clase que define las solicitudes de constancia de estudio
+class Solicitud {
+private:
+    string nombreAlumno;
+    string carrera;
+    int materiasAprobadas;
+    float promedioGeneral;
+
+public:
+    Solicitud(string _nombreAlumno = "", string _carrera = "", int _materiasAprobadas = 0, float _promedioGeneral = 0.0)
+        : nombreAlumno(_nombreAlumno), carrera(_carrera), materiasAprobadas(_materiasAprobadas), promedioGeneral(_promedioGeneral) {}
+
+    // Sobrecarga del operador << para mostrar la solicitud
+    friend ostream& operator<<(ostream& os, const Solicitud& sol) {
+        os << "Nombre del Alumno: " << sol.nombreAlumno << ", Carrera: " << sol.carrera
+           << ", Materias Aprobadas: " << sol.materiasAprobadas << ", Promedio General: " << sol.promedioGeneral;
+        return os;
+    }
+
+    // Sobrecarga del operador >> para ingresar la solicitud
+    friend istream& operator>>(istream& is, Solicitud& sol) {
+        cout << "Ingrese nombre del alumno: ";
+        is.ignore();
+        getline(is, sol.nombreAlumno);
+        cout << "Ingrese carrera: ";
+        getline(is, sol.carrera);
+        cout << "Ingrese número de materias aprobadas: ";
+        is >> sol.materiasAprobadas;
+        cout << "Ingrese promedio general: ";
+        is >> sol.promedioGeneral;
+        return is;
+    }
+
+    // Sobrecarga del operador == para buscar por nombre del alumno
+    bool operator==(const Solicitud& sol) const {
+        return this->nombreAlumno == sol.nombreAlumno;
+    }
+
+    // Sobrecarga del operador < para búsqueda binaria
+    bool operator<(const Solicitud& sol) const {
+        return this->nombreAlumno < sol.nombreAlumno;
+    }
+};
+
+// Clase Cola (con plantillas)
+template <class T>
+class Cola {
+private:
+    T datos[MAX];  // Arreglo que almacena los elementos de la cola
+    int frente, fin;  // indices para la cola
+
+public:
+    Cola() : frente(0), fin(-1) {}  // Constructor inicializa la cola
+
+    int encolar(T elemento);     // Metodo para encolar un elemento
+    int desencolar();            // Metodo para desencolar un elemento
+    T verFrente();               // Ver el elemento en el frente
+    int vacia();                 // Verificar si la cola está vacía
+    int llena();                 // Verificar si la cola está llena
+    int buscarSolicitudLineal(T elemento);  // Búsqueda lineal
+    int buscarSolicitudBinaria(T elemento); // Búsqueda binaria (solo si la cola está ordenada)
+};
+
+class empleado {
+private:
+    int clave;
+    string nombre;
+    string domicilio;
+    float sueldo;
+    string reportaA;
+
+
+    void CambiaDomicilio(string);
+    void CambiaReportaA(string);
+    void ActualizarSueldo(float);
+
+public:
+    empleado(int _clave = 0, string _nombre = "", string _domicilio = "", float _sueldo = 0.0, string _reportaA = "")
+        : clave(_clave), nombre(_nombre), domicilio(_domicilio), sueldo(_sueldo), reportaA(_reportaA) {}
+
+    void imprime() const;
+    friend ostream& operator<<(ostream& os, const empleado& emp) {
+        os << "Clave: " << emp.clave << ", Nombre: " << emp.nombre
+           << ", Domicilio: " << emp.domicilio << ", Sueldo: " << emp.sueldo
+           << ", Reporta a: " << emp.reportaA;
+        return os;
+    }
+
+    bool operator==(const empleado& otro) const { return clave == otro.clave; }
+    bool operator<(const empleado& otro) const { //sobrecarga de <
+        return this->sueldo < otro.sueldo;
+    }
+    bool operator>(const empleado& otro) const {  // Sobrecarga del operador >
+        return this->sueldo > otro.sueldo;
+    }
+    bool operator!=(const empleado& otro) const { // compara que ambos sueldos sean diferentes
+        return this->sueldo != otro.sueldo;
+    }
+
+    friend istream& operator>>(istream& is, empleado& emp) {
+        cout << "Ingrese clave: ";
+        is >> emp.clave;
+        cout << "Ingrese nombre: ";
+        is.ignore();
+        getline(is, emp.nombre);
+        cout << "Ingrese domicilio: ";
+        getline(is, emp.domicilio);
+        cout << "Ingrese sueldo: ";
+        is >> emp.sueldo;
+        cout << "Ingrese jefe a quien reporta: ";
+        is.ignore();
+        getline(is, emp.reportaA);
+        return is;
+    }
+};
+
+// Metodo para encolar un elemento
+template <class T>
+int Cola<T>::encolar(T elemento) {
+    if (llena()) {
+        cout << "La cola esta llena, no se puede encolar." << endl;
+        return -1;
+    }
+    datos[++fin] = elemento;
+    return fin;
+}
+
+// Metodo para desencolar un elemento
+template <class T>
+int Cola<T>::desencolar() {
+    if (vacia()) {
+        cout << "La cola está vacia, no se puede desencolar." << endl;
+        return -1;
+    }
+    frente++;
+    return frente;
+}
+
+// Metodo para ver el elemento en el frente de la cola
+template <class T>
+T Cola<T>::verFrente() {
+    if (vacia()) {
+        cout << "La cola está vacía." << endl;
+        return T();  // Devuelve un objeto vacio si la cola está vacía
+    }
+    return datos[frente];
+}
+
+// Metodo para verificar si la cola esta vacía
+template <class T>
+int Cola<T>::vacia() {
+    return frente > fin;
+}
+
+// Metodo para verificar si la cola está llena
+template <class T>
+int Cola<T>::llena() {
+    return fin == MAX - 1;
+}
+
+// Busqueda lineal
+template <class T>
+int Cola<T>::buscarSolicitudLineal(T elemento) {
+    for (int i = frente; i <= fin; i++) {
+        if (datos[i] == elemento) {
+            return i - frente;  // Retorna cuántas constancias faltan antes del turno
+        }
+    }
+    return -1;  // No encontrado
+}
+
+// Busqueda binaria (la cola debe estar ordenada por nombre de alumno)
+template <class T>
+int Cola<T>::buscarSolicitudBinaria(T elemento) {
+    int inicio = frente, finIndex = fin;
+    while (inicio <= finIndex) {
+        int medio = (inicio + finIndex) / 2;
+        if (datos[medio] == elemento) {
+            return medio - frente;  // Retorna cuantas constancias faltan antes del turno
+        }
+        else if (datos[medio] < elemento) {
+            inicio = medio + 1;
+        }
+        else {
+            finIndex = medio - 1;
+        }
+    }
+    return -1;  // No encontrado
+}
+
+int main() {
+    Cola<Solicitud> cola;
+    int opcion;
+    Solicitud sol;
+
+    do {
+        cout << "\nMenu de Solicitudes" << endl;
+        cout << "1. Dar de alta la solicitud (Encolar)" << endl;
+        cout << "2. Elaborar constancia (Desencolar)" << endl;
+        cout << "3. Ver la solicitud proxima a atender (Frente de la cola)" << endl;
+        cout << "4. Buscar una solicitud (Lineal)" << endl;
+        cout << "6. Salir" << endl;
+        cout << "Digite un numero: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                cin >> sol;
+                cola.encolar(sol);
+                break;
+            case 2:
+                cola.desencolar();
+                break;
+            case 3:
+                sol = cola.verFrente();
+                if (!cola.vacia()) {
+                    cout << "Solicitud en el frente: " << sol << endl;
+                }
+                break;
+            case 4: {
+                cout << "Ingrese el nombre del alumno para buscar: ";
+                cin >> sol;
+                int resultado = cola.buscarSolicitudLineal(sol);
+                if (resultado != -1) {
+                    cout << "Faltan " << resultado << " constancias antes de la solicitud del alumno." << endl;
+                } else {
+                    cout << "La solicitud no se encuentra en la cola." << endl;
+                }
+                break;
+            }
+            case 5:
+                cout << "Saliendo del sistema de solicitudes..." << endl;
+                break;
+            default:
+                cout << "Opcion no valida." << endl;
+        }
+    } while (opcion != 5);
+
+    return 0;
+}
